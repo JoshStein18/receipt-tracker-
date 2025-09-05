@@ -356,15 +356,37 @@ def get_receipt_image(filename):
     try:
         upload_dir = app.config["UPLOAD_DIR"]
         
-        # Find the file in the upload directory
+        # Find the file in the upload directory and subdirectories
         for root, dirs, files in os.walk(upload_dir):
             if filename in files:
+                file_path = os.path.join(root, filename)
+                logger.info(f"Serving image from: {file_path}")
                 return send_from_directory(root, filename)
         
+        logger.error(f"Image not found: {filename}")
         return jsonify({'error': 'Receipt image not found'}), 404
     except Exception as e:
         logger.error(f"Error serving receipt image: {e}")
         return jsonify({'error': 'Failed to serve receipt image'}), 500
+
+@app.route('/receipts/<filename>')
+def serve_receipt_image(filename):
+    """Alternative endpoint to serve receipt images"""
+    try:
+        upload_dir = app.config["UPLOAD_DIR"]
+        
+        # Find the file in the upload directory and subdirectories
+        for root, dirs, files in os.walk(upload_dir):
+            if filename in files:
+                file_path = os.path.join(root, filename)
+                logger.info(f"Serving image from: {file_path}")
+                return send_from_directory(root, filename)
+        
+        logger.error(f"Image not found: {filename}")
+        return "Image not found", 404
+    except Exception as e:
+        logger.error(f"Error serving receipt image: {e}")
+        return "Error serving image", 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():

@@ -625,6 +625,7 @@
                 if (data.success) {
                     const receipts = data.data;
                     const receiptGalleryDiv = document.getElementById('receiptGallery');
+                    console.log('Receipts data:', receipts);
                     
                     if (receipts.length === 0) {
                         receiptGalleryDiv.innerHTML = '<div class="receipt-item">No receipts found</div>';
@@ -637,7 +638,8 @@
                                 <div class="receipt-item">
                                     <strong>${receipt.filename}</strong><br>
                                     <small>Uploaded: ${uploadDate} | Size: ${fileSize} KB</small><br>
-                                    <img src="${receipt.url}" alt="${receipt.filename}" onclick="window.open('${receipt.url}', '_blank')" style="cursor: pointer;">
+                                    <img src="${receipt.url}" alt="${receipt.filename}" onclick="window.open('${receipt.url}', '_blank')" style="cursor: pointer; max-width: 200px; max-height: 200px;" onerror="this.onerror=null; this.src='/receipts/${receipt.filename}';">
+                                    <br><a href="${receipt.url}" target="_blank" style="color: #4facfe;">View Full Size</a>
                                 </div>
                             `;
                         });
