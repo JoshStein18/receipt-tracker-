@@ -48,11 +48,26 @@ class OCRProcessor:
             image = Image.open(image_path)
             processed_image = self.preprocess_image(image)
             
-            # Configure tesseract for better accuracy
-            custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,-$%() '
+            # Try multiple OCR configurations for better results
+            configs = [
+                r'--oem 3 --psm 6',  # Default
+                r'--oem 3 --psm 4',  # Single column
+                r'--oem 3 --psm 3',  # Fully automatic
+                r'--oem 3 --psm 1',  # Automatic page segmentation with OSD
+            ]
             
-            # Extract text
-            text = pytesseract.image_to_string(processed_image, config=custom_config)
+            best_text = ""
+            for config in configs:
+                try:
+                    text = pytesseract.image_to_string(processed_image, config=config)
+                    if len(text.strip()) > len(best_text.strip()):
+                        best_text = text
+                        logger.info(f"Better OCR result with config: {config}")
+                except Exception as e:
+                    logger.warning(f"OCR config {config} failed: {e}")
+                    continue
+            
+            text = best_text
             
             return text.strip()
         except Exception as e:
@@ -74,10 +89,26 @@ class OCRProcessor:
             for i, image in enumerate(images):
                 try:
                     processed_image = self.preprocess_image(image)
-                    custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,-$%() '
-                    page_text = pytesseract.image_to_string(processed_image, config=custom_config)
-                    if page_text.strip():
-                        all_text.append(f"--- Page {i+1} ---\n{page_text.strip()}")
+                    
+                    # Try multiple OCR configurations for PDF pages too
+                    configs = [
+                        r'--oem 3 --psm 6',  # Default
+                        r'--oem 3 --psm 4',  # Single column
+                        r'--oem 3 --psm 3',  # Fully automatic
+                    ]
+                    
+                    best_page_text = ""
+                    for config in configs:
+                        try:
+                            page_text = pytesseract.image_to_string(processed_image, config=config)
+                            if len(page_text.strip()) > len(best_page_text.strip()):
+                                best_page_text = page_text
+                        except Exception as e:
+                            logger.warning(f"PDF page {i+1} OCR config {config} failed: {e}")
+                            continue
+                    
+                    if best_page_text.strip():
+                        all_text.append(f"--- Page {i+1} ---\n{best_page_text.strip()}")
                 except Exception as e:
                     logger.warning(f"Failed to process PDF page {i+1}: {e}")
                     continue

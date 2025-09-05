@@ -254,6 +254,42 @@ class ReceiptParser:
                     logger.info(f"Created generic item with amount: ${amount}")
                     break
         
+        # If STILL no items, create a generic item from the total amount
+        if not items and total_amount > 0:
+            logger.info("Creating generic item from total amount...")
+            items.append(ReceiptItem(
+                description="Receipt Total",
+                quantity=1.0,
+                unit_price=total_amount,
+                total_price=total_amount,
+                confidence=0.2
+            ))
+            logger.info(f"Created generic item from total: ${total_amount}")
+        
+        # If STILL no items, create a generic item from any amount found
+        if not items:
+            logger.info("Creating generic item from any amount found...")
+            for line in lines:
+                # Look for any number that could be a price
+                numbers = re.findall(r'\d+\.?\d*', line)
+                for num in numbers:
+                    try:
+                        amount = float(num)
+                        if 0.01 <= amount <= 1000:  # Reasonable price range
+                            items.append(ReceiptItem(
+                                description="Receipt Item",
+                                quantity=1.0,
+                                unit_price=amount,
+                                total_price=amount,
+                                confidence=0.1
+                            ))
+                            logger.info(f"Created generic item from number: ${amount}")
+                            break
+                    except ValueError:
+                        continue
+                if items:  # If we found an item, break
+                    break
+        
         logger.info(f"Final item count: {len(items)}")
         return items
     

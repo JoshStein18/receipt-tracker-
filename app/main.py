@@ -67,19 +67,30 @@ def upload_receipt():
         
         # Process the file
         try:
+            logger.info(f"Starting OCR processing for: {filename}")
             # Extract text using OCR
             raw_text = ocr_processor.extract_text(upload_path)
+            logger.info(f"OCR extracted {len(raw_text)} characters")
+            logger.info(f"OCR text preview: {raw_text[:200]}...")
+            
             confidence = ocr_processor.get_confidence_score(raw_text)
+            logger.info(f"OCR confidence: {confidence}")
             
             # Parse the receipt
+            logger.info("Starting receipt parsing...")
             receipt_data = receipt_parser.parse_receipt(raw_text, filename)
             receipt_data.confidence = confidence
+            logger.info(f"Parsed receipt: {len(receipt_data.items)} items, total: ${receipt_data.total_amount}")
             
             # Categorize items
+            logger.info("Starting categorization...")
             receipt_data = categorizer.categorize_receipt(receipt_data)
+            logger.info("Categorization complete")
             
             # Save to Excel
+            logger.info("Saving to Excel...")
             success = excel_store.append_receipt(receipt_data)
+            logger.info(f"Excel save success: {success}")
             
             if not success:
                 return jsonify({'error': 'Failed to save to Excel'}), 500

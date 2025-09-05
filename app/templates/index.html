@@ -416,8 +416,10 @@
         const resultsContent = document.getElementById('resultsContent');
         const stats = document.getElementById('stats');
 
-        // Load stats on page load
+        // Load stats and dashboard on page load
         loadStats();
+        loadCategoryTotals();
+        viewReceipts();
 
         // Drag and drop functionality
         uploadArea.addEventListener('dragover', (e) => {
@@ -499,6 +501,9 @@
                         showFileInfo('Receipt processed successfully!', 'success');
                         displayResults(data.data);
                         loadStats(); // Refresh stats
+                        // Auto-reload dashboard
+                        loadCategoryTotals();
+                        viewReceipts();
                     } else {
                         showFileInfo(`Error: ${data.error}`, 'error');
                     }
