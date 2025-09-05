@@ -1,0 +1,210 @@
+{
+  "categories": {
+    "groceries": {
+      "keywords": [
+        "grocery",
+        "food",
+        "supermarket",
+        "market",
+        "fresh",
+        "produce",
+        "meat",
+        "dairy",
+        "bread",
+        "milk",
+        "eggs",
+        "cheese",
+        "fruit",
+        "vegetable",
+        "organic",
+        "whole foods",
+        "safeway",
+        "kroger",
+        "walmart",
+        "target",
+        "costco",
+        "sam's club"
+      ],
+      "description": "Grocery and food items"
+    },
+    "restaurants": {
+      "keywords": [
+        "restaurant",
+        "cafe",
+        "coffee",
+        "pizza",
+        "burger",
+        "sandwich",
+        "dining",
+        "food",
+        "eat",
+        "lunch",
+        "dinner",
+        "breakfast",
+        "mcdonald's",
+        "burger king",
+        "subway",
+        "starbucks",
+        "dunkin",
+        "chipotle",
+        "taco bell",
+        "kfc",
+        "pizza hut",
+        "domino's"
+      ],
+      "description": "Restaurant and dining expenses"
+    },
+    "gas": {
+      "keywords": [
+        "gas",
+        "fuel",
+        "gasoline",
+        "petrol",
+        "station",
+        "shell",
+        "exxon",
+        "chevron",
+        "bp",
+        "mobil",
+        "speedway",
+        "7-eleven"
+      ],
+      "description": "Gas and fuel expenses"
+    },
+    "utilities": {
+      "keywords": [
+        "electric",
+        "water",
+        "gas",
+        "utility",
+        "power",
+        "energy",
+        "internet",
+        "phone",
+        "cable",
+        "internet",
+        "telecom"
+      ],
+      "description": "Utility bills and services"
+    },
+    "transportation": {
+      "keywords": [
+        "uber",
+        "lyft",
+        "taxi",
+        "bus",
+        "train",
+        "metro",
+        "transit",
+        "parking",
+        "toll",
+        "highway",
+        "airport",
+        "flight",
+        "rental"
+      ],
+      "description": "Transportation and travel"
+    },
+    "healthcare": {
+      "keywords": [
+        "pharmacy",
+        "drug",
+        "medicine",
+        "medical",
+        "doctor",
+        "hospital",
+        "clinic",
+        "cvs",
+        "walgreens",
+        "rite aid",
+        "health",
+        "prescription"
+      ],
+      "description": "Healthcare and medical expenses"
+    },
+    "entertainment": {
+      "keywords": [
+        "movie",
+        "cinema",
+        "theater",
+        "netflix",
+        "spotify",
+        "amazon prime",
+        "game",
+        "entertainment",
+        "sports",
+        "gym",
+        "fitness",
+        "club"
+      ],
+      "description": "Entertainment and recreation"
+    },
+    "shopping": {
+      "keywords": [
+        "clothing",
+        "apparel",
+        "shoes",
+        "accessories",
+        "electronics",
+        "amazon",
+        "ebay",
+        "online",
+        "store",
+        "retail",
+        "fashion"
+      ],
+      "description": "General shopping and retail"
+    },
+    "office": {
+      "keywords": [
+        "office",
+        "supplies",
+        "stationery",
+        "paper",
+        "pen",
+        "pencil",
+        "staples",
+        "office depot",
+        "business",
+        "work",
+        "professional"
+      ],
+      "description": "Office supplies and business expenses"
+    },
+    "home": {
+      "keywords": [
+        "home",
+        "depot",
+        "lowes",
+        "hardware",
+        "furniture",
+        "appliance",
+        "garden",
+        "lawn",
+        "maintenance",
+        "repair",
+        "improvement"
+      ],
+      "description": "Home improvement and maintenance"
+    }
+  },
+  "store_mappings": {
+    "walmart": "groceries",
+    "target": "shopping",
+    "costco": "groceries",
+    "safeway": "groceries",
+    "kroger": "groceries",
+    "whole foods": "groceries",
+    "starbucks": "restaurants",
+    "mcdonald's": "restaurants",
+    "subway": "restaurants",
+    "shell": "gas",
+    "exxon": "gas",
+    "chevron": "gas",
+    "cvs": "healthcare",
+    "walgreens": "healthcare",
+    "amazon": "shopping",
+    "home depot": "home",
+    "lowes": "home"
+  }
+}

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .upload-section {
+            margin-bottom: 40px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #e1e5e9;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #f8f9fa;
+        }
+        
+        .upload-area:hover {
+            border-color: #4facfe;
+            background: #f0f8ff;
+        }
+        
+        .upload-area.dragover {
+            border-color: #4facfe;
+            background: #e6f3ff;
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #4facfe;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+        
+        .file-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e8;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            display: none;
+        }
+        
+        .file-info.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e1e5e9;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .results h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .result-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #4facfe;
+        }
+        
+        .result-item strong {
+            color: #333;
+        }
+        
+        .api-section {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .api-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .api-endpoint {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .api-endpoint code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4facfe;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧾 Receipt Tracker</h1>
+            <p>Upload receipt images or PDFs to extract and categorize expenses</p>
+        </div>
+        
+        <div class="content">
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Drag & drop your receipt here or click to browse</div>
+                    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                        Choose File
+                    </button>
+                    <input type="file" id="fileInput" class="file-input" accept=".png,.jpg,.jpeg,.gif,.bmp,.tiff,.pdf">
+                </div>
+                
+                <div class="file-info" id="fileInfo"></div>
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+            
+            <div class="results" id="results">
+                <h3>📊 Parsed Receipt Data</h3>
+                <div id="resultsContent"></div>
+            </div>
+            
+            <div class="stats" id="stats">
+                <!-- Stats will be loaded here -->
+            </div>
+            
+            <div class="api-section">
+                <h3>🔌 API Endpoints</h3>
+                <div class="api-endpoint">
+                    <strong>POST</strong> <code>/api/upload</code> - Upload and process receipts
+                </div>
+                <div class="api-endpoint">
+                    <strong>GET</strong> <code>/api/transactions?limit=100</code> - Get latest transactions
+                </div>
+                <div class="api-endpoint">
+                    <strong>GET</strong> <code>/api/weekly_summary?start=2024-01-01&end=2024-01-07</code> - Get weekly summary
+                </div>
+                <div class="api-endpoint">
+                    <strong>POST</strong> <code>/api/corrections</code> - Update transaction data
+                </div>
+                <div class="api-endpoint">
+                    <strong>GET</strong> <code>/api/health</code> - Health check
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const results = document.getElementById('results');
+        const resultsContent = document.getElementById('resultsContent');
+        const stats = document.getElementById('stats');
+
+        // Load stats on page load
+        loadStats();
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            // Validate file type
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/bmp', 'image/tiff', 'application/pdf'];
+            if (!allowedTypes.includes(file.type)) {
+                showFileInfo('Please select a valid image or PDF file.', 'error');
+                return;
+            }
+
+            // Validate file size (10MB max)
+            if (file.size > 10 * 1024 * 1024) {
+                showFileInfo('File size must be less than 10MB.', 'error');
+                return;
+            }
+
+            showFileInfo(`Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+            uploadFile(file);
+        }
+
+        function showFileInfo(message, type = 'success') {
+            fileInfo.textContent = message;
+            fileInfo.className = `file-info ${type}`;
+            fileInfo.style.display = 'block';
+        }
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
+
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 90) progress = 90;
+                progressFill.style.width = progress + '%';
+            }, 200);
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    progressBar.style.display = 'none';
+                    if (data.success) {
+                        showFileInfo('Receipt processed successfully!', 'success');
+                        displayResults(data.data);
+                        loadStats(); // Refresh stats
+                    } else {
+                        showFileInfo(`Error: ${data.error}`, 'error');
+                    }
+                }, 500);
+            })
+            .catch(error => {
+                clearInterval(progressInterval);
+                progressBar.style.display = 'none';
+                showFileInfo(`Upload failed: ${error.message}`, 'error');
+            });
+        }
+
+        function displayResults(data) {
+            results.style.display = 'block';
+            
+            let html = `
+                <div class="result-item">
+                    <strong>Store:</strong> ${data.store_name || 'Unknown'}<br>
+                    <strong>Date:</strong> ${data.transaction_date || 'Unknown'}<br>
+                    <strong>Total:</strong> $${data.total_amount.toFixed(2)}<br>
+                    <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(1)}%
+                </div>
+            `;
+
+            if (data.items && data.items.length > 0) {
+                html += '<h4>Items:</h4>';
+                data.items.forEach(item => {
+                    html += `
+                        <div class="result-item">
+                            <strong>${item.description}</strong><br>
+                            Quantity: ${item.quantity} × $${item.unit_price.toFixed(2)} = $${item.total_price.toFixed(2)}<br>
+                            Category: ${item.category}
+                        </div>
+                    `;
+                });
+            }
+
+            resultsContent.innerHTML = html;
+        }
+
+        function loadStats() {
+            fetch('/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const statsData = data.data;
+                    stats.innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-number">${statsData.total_transactions}</div>
+                            <div class="stat-label">Total Transactions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">$${statsData.total_spent.toFixed(2)}</div>
+                            <div class="stat-label">Total Spent</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${statsData.categories.length}</div>
+                            <div class="stat-label">Categories</div>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Failed to load stats:', error);
+            });
+        }
+    </script>
+</body>
+</html>
