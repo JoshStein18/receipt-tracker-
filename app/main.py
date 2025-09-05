@@ -9,6 +9,7 @@ from . import create_app
 from .ocr import OCRProcessor
 from .parser import ReceiptParser
 from .categorizer import ReceiptCategorizer
+from .intelligent_categorizer import IntelligentReceiptCategorizer
 from .excel_store import ExcelStore
 from .utils import get_upload_path, safe_filename
 
@@ -22,7 +23,7 @@ app = create_app()
 # Initialize components
 ocr_processor = OCRProcessor()
 receipt_parser = ReceiptParser()
-categorizer = ReceiptCategorizer()
+categorizer = IntelligentReceiptCategorizer()  # Use intelligent categorizer
 excel_store = ExcelStore(app.config["EXCEL_PATH"])
 
 # Allowed file extensions
