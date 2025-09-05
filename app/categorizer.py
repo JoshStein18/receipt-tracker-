@@ -12,7 +12,7 @@ class ReceiptCategorizer:
     """Categorizes receipt items based on keyword rules"""
     
     def __init__(self, rules_file: str = None):
-        self.rules_file = rules_file or "rules.default.json"
+        self.rules_file = rules_file or os.path.join(os.path.dirname(__file__), "rules.default.json")
         self.rules = self._load_rules()
     
     def _load_rules(self) -> Dict:
@@ -196,9 +196,13 @@ class ReceiptCategorizer:
             keywords = data.get("keywords", [])
             
             for keyword in keywords:
-                if keyword in description_lower:
+                # Use word boundary matching for more precise categorization
+                if re.search(r'\b' + re.escape(keyword) + r'\b', description_lower):
                     # Longer keywords get higher scores
                     score += len(keyword)
+                elif keyword in description_lower:
+                    # Partial match gets lower score
+                    score += len(keyword) // 2
             
             if score > 0:
                 category_scores[category] = score

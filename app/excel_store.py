@@ -47,22 +47,23 @@ class ExcelStore:
             # Create new rows DataFrame
             new_rows = []
             for row in transaction_rows:
-                new_rows.append({
-                    'id': row.id,
-                    'upload_date': row.upload_date,
-                    'filename': row.filename,
-                    'store_name': row.store_name,
-                    'transaction_date': row.transaction_date,
-                    'item_description': row.item_description,
-                    'quantity': row.quantity,
-                    'unit_price': row.unit_price,
-                    'total_price': row.total_price,
-                    'category': row.category,
-                    'subtotal': row.subtotal,
-                    'tax_amount': row.tax_amount,
-                    'total_amount': row.total_amount,
-                    'confidence': row.confidence
-                })
+                            new_rows.append({
+                'id': row.id,
+                'upload_date': row.upload_date,
+                'filename': row.filename,
+                'store_name': row.store_name,
+                'transaction_date': row.transaction_date,
+                'item_description': row.item_description,
+                'quantity': row.quantity,
+                'unit_price': row.unit_price,
+                'total_price': row.total_price,
+                'category': row.category,
+                'subtotal': row.subtotal,
+                'tax_amount': row.tax_amount,
+                'total_amount': row.total_amount,
+                'confidence': row.confidence,
+                'raw_text': receipt_data.raw_text
+            })
             
             new_df = pd.DataFrame(new_rows)
             

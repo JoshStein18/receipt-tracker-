@@ -134,6 +134,31 @@ class ReceiptParser:
             # If we only have total, assume it's the subtotal
             subtotal = total_amount
         
+        # If we still don't have totals, try to find any currency amounts
+        if total_amount == 0 and subtotal == 0:
+            amounts = []
+            for line in lines:
+                amount = extract_currency(line)
+                if amount and amount > 0:
+                    amounts.append(amount)
+            
+            if amounts:
+                # Sort amounts and use the largest as total
+                amounts.sort(reverse=True)
+                total_amount = amounts[0]
+                if len(amounts) > 1:
+                    subtotal = amounts[1]
+        
+        # If still no totals, try to extract from the full text
+        if total_amount == 0 and subtotal == 0:
+            full_text = ' '.join(lines)
+            amounts = self._extract_amounts_from_text(full_text)
+            if amounts:
+                amounts.sort(reverse=True)
+                total_amount = amounts[0]
+                if len(amounts) > 1:
+                    subtotal = amounts[1]
+        
         return subtotal, tax_amount, total_amount
     
     def _extract_items(self, lines: List[str]) -> List[ReceiptItem]:
@@ -152,10 +177,82 @@ class ReceiptParser:
             if item:
                 items.append(item)
         
+        # If no items found, try to extract from any line with currency
+        if not items:
+            for line in lines:
+                # Look for lines with currency amounts that might be items
+                if '$' in line or re.search(r'\d+\.\d{2}', line):
+                    # Skip obvious totals
+                    if not any(keyword in line.lower() for keyword in 
+                             self.total_keywords + self.subtotal_keywords + self.tax_keywords):
+                        item = self._parse_item_line(line)
+                        if item:
+                            items.append(item)
+        
+        # If still no items, try to parse the entire text as one line
+        if not items:
+            # Join all lines and try to extract items from the combined text
+            full_text = ' '.join(lines)
+            items = self._extract_items_from_text(full_text)
+        
         return items
+    
+    def _extract_items_from_text(self, text: str) -> List[ReceiptItem]:
+        """Extract items from continuous text (for garbled OCR)"""
+        items = []
+        
+        # Look for patterns like "Apples2x150 00" or "Milk1x29999"
+        # Pattern: word + number + x + number + number
+        pattern = r'([A-Za-z]+)(\d+)x(\d+)(\d{2})'
+        matches = re.findall(pattern, text)
+        
+        for match in matches:
+            name, quantity, price_int, price_dec = match
+            price = float(f"{price_int}.{price_dec}")
+            
+            # Skip if it looks like a total
+            if any(keyword in name.lower() for keyword in 
+                   self.total_keywords + self.subtotal_keywords + self.tax_keywords):
+                continue
+            
+            items.append(ReceiptItem(
+                description=name,
+                quantity=float(quantity),
+                unit_price=price,
+                total_price=price * float(quantity),
+                confidence=0.6
+            ))
+        
+        return items
+    
+    def _extract_amounts_from_text(self, text: str) -> List[float]:
+        """Extract currency amounts from garbled OCR text"""
+        amounts = []
+        
+        # Look for patterns like "96" or "68" that might be prices
+        # Pattern: 2-3 digits that could be prices
+        pattern = r'\b(\d{2,3})\b'
+        matches = re.findall(pattern, text)
+        
+        for match in matches:
+            # Convert to decimal (e.g., "96" -> 0.96, "968" -> 9.68)
+            if len(match) == 2:
+                amount = float(match) / 100  # "96" -> 0.96
+            else:
+                amount = float(match) / 100  # "968" -> 9.68
+            
+            if 0.01 <= amount <= 1000:  # Reasonable price range
+                amounts.append(amount)
+        
+        return amounts
     
     def _parse_item_line(self, line: str) -> Optional[ReceiptItem]:
         """Parse a single line to extract item information"""
+        # Clean the line
+        line = line.strip()
+        if not line:
+            return None
+        
         # Pattern 1: Description with quantity and price
         match = re.match(self.quantity_item_pattern, line)
         if match:
@@ -198,6 +295,32 @@ class ReceiptParser:
                 unit_price=price,
                 total_price=price,
                 confidence=0.6
+            )
+        
+        # Pattern 4: Look for any currency amount in the line
+        currency_matches = re.findall(r'\$?(\d+\.?\d{2})', line)
+        if currency_matches:
+            # Use the last (usually largest) amount as the price
+            price = float(currency_matches[-1])
+            description = line
+            
+            # Remove the price from description
+            for match in currency_matches:
+                description = description.replace(f'${match}', '').replace(match, '')
+            
+            description = description.strip()
+            
+            # Skip if description is too short or looks like a total
+            if len(description) < 3 or any(keyword in description.lower() for keyword in 
+                                         self.total_keywords + self.subtotal_keywords + self.tax_keywords):
+                return None
+            
+            return ReceiptItem(
+                description=description,
+                quantity=1.0,
+                unit_price=price,
+                total_price=price,
+                confidence=0.5
             )
         
         return None

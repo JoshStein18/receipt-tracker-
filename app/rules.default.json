@@ -73,6 +73,37 @@
         "garden", "lawn", "maintenance", "repair", "improvement"
       ],
       "description": "Home improvement and maintenance"
+    },
+    "food": {
+      "keywords": [
+        "food", "eat", "meal", "snack", "drink", "beverage", "coffee", "tea",
+        "breakfast", "lunch", "dinner", "cafe", "restaurant", "dining",
+        "pizza", "burger", "sandwich", "salad", "soup", "pasta", "chicken",
+        "beef", "fish", "vegetarian", "vegan", "organic", "fresh", "produce",
+        "apples", "bananas", "oranges", "grapes", "strawberries", "milk",
+        "cheese", "yogurt", "butter", "eggs", "bread", "cereal", "rice",
+        "pasta", "noodles", "meat", "chicken", "beef", "pork", "fish",
+        "vegetables", "fruits", "snacks", "candy", "chocolate", "cookies"
+      ],
+      "description": "All food and dining expenses"
+    },
+    "technology": {
+      "keywords": [
+        "computer", "laptop", "desktop", "tablet", "phone", "smartphone",
+        "electronics", "tech", "software", "hardware", "accessories",
+        "cable", "charger", "battery", "headphones", "speaker", "monitor",
+        "keyboard", "mouse", "webcam", "microphone", "camera", "gaming",
+        "console", "controller", "apple", "samsung", "microsoft", "google",
+        "amazon", "best buy", "microcenter", "newegg", "dell", "hp", "lenovo"
+      ],
+      "description": "Technology and electronics"
+    },
+    "misc": {
+      "keywords": [
+        "misc", "miscellaneous", "other", "various", "general", "unknown",
+        "unclassified", "uncategorized", "random", "stuff", "items"
+      ],
+      "description": "Miscellaneous and uncategorized items"
     }
   },
   "store_mappings": {
@@ -82,15 +113,26 @@
     "safeway": "groceries",
     "kroger": "groceries",
     "whole foods": "groceries",
-    "starbucks": "restaurants",
-    "mcdonald's": "restaurants",
-    "subway": "restaurants",
+    "starbucks": "food",
+    "mcdonald's": "food",
+    "subway": "food",
+    "pizza hut": "food",
+    "domino's": "food",
+    "kfc": "food",
+    "taco bell": "food",
+    "chipotle": "food",
     "shell": "gas",
     "exxon": "gas",
     "chevron": "gas",
     "cvs": "healthcare",
     "walgreens": "healthcare",
     "amazon": "shopping",
+    "best buy": "technology",
+    "apple": "technology",
+    "microsoft": "technology",
+    "dell": "technology",
+    "hp": "technology",
+    "lenovo": "technology",
     "home depot": "home",
     "lowes": "home"
   }
