@@ -52,7 +52,7 @@ class ReceiptParser:
         logger.info(f"Extracted totals - Subtotal: {subtotal}, Tax: {tax_amount}, Total: {total_amount}")
         
         # Extract line items
-        items = self._extract_items(lines)
+        items = self._extract_items(lines, subtotal, tax_amount, total_amount)
         logger.info(f"Extracted {len(items)} items")
         
         # Calculate confidence based on extracted data
@@ -196,7 +196,7 @@ class ReceiptParser:
         logger.info(f"Final totals - Subtotal: {subtotal}, Tax: {tax_amount}, Total: {total_amount}")
         return subtotal, tax_amount, total_amount
     
-    def _extract_items(self, lines: List[str]) -> List[ReceiptItem]:
+    def _extract_items(self, lines: List[str], subtotal: float, tax_amount: float, total_amount: float) -> List[ReceiptItem]:
         """Extract line items from receipt"""
         items = []
         logger.info("Extracting items from lines...")
