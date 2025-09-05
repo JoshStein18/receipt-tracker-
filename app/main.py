@@ -249,6 +249,112 @@ def get_stats():
         logger.error(f"Error getting stats: {e}")
         return jsonify({'error': 'Failed to get stats'}), 500
 
+@app.route('/api/category_totals', methods=['GET'])
+def get_category_totals():
+    """Get totals for food vs non-food categories"""
+    try:
+        # Get all transactions
+        transactions = excel_store.get_transactions(limit=1000)  # Get more transactions
+        
+        food_total = 0.0
+        non_food_total = 0.0
+        food_count = 0
+        non_food_count = 0
+        
+        for transaction in transactions:
+            if transaction.get('category') == 'food':
+                food_total += float(transaction.get('total_price', 0))
+                food_count += 1
+            elif transaction.get('category') == 'non-food':
+                non_food_total += float(transaction.get('total_price', 0))
+                non_food_count += 1
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'food': {
+                    'total': round(food_total, 2),
+                    'count': food_count
+                },
+                'non_food': {
+                    'total': round(non_food_total, 2),
+                    'count': non_food_count
+                },
+                'grand_total': round(food_total + non_food_total, 2)
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error getting category totals: {e}")
+        return jsonify({'error': 'Failed to get category totals'}), 500
+
+@app.route('/api/download_excel', methods=['GET'])
+def download_excel():
+    """Download the Excel file"""
+    try:
+        excel_path = app.config["EXCEL_PATH"]
+        if not os.path.exists(excel_path):
+            return jsonify({'error': 'Excel file not found'}), 404
+        
+        return send_from_directory(
+            os.path.dirname(excel_path),
+            os.path.basename(excel_path),
+            as_attachment=True,
+            download_name='receipts.xlsx'
+        )
+    except Exception as e:
+        logger.error(f"Error downloading Excel file: {e}")
+        return jsonify({'error': 'Failed to download Excel file'}), 500
+
+@app.route('/api/receipts', methods=['GET'])
+def get_receipts():
+    """Get list of all uploaded receipts"""
+    try:
+        upload_dir = app.config["UPLOAD_DIR"]
+        receipts = []
+        
+        # Walk through the upload directory to find all files
+        for root, dirs, files in os.walk(upload_dir):
+            for file in files:
+                if file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.pdf')):
+                    file_path = os.path.join(root, file)
+                    file_size = os.path.getsize(file_path)
+                    file_date = datetime.fromtimestamp(os.path.getmtime(file_path))
+                    
+                    receipts.append({
+                        'filename': file,
+                        'path': file_path,
+                        'size': file_size,
+                        'upload_date': file_date.isoformat(),
+                        'url': f'/api/receipt_image/{file}'
+                    })
+        
+        # Sort by upload date (newest first)
+        receipts.sort(key=lambda x: x['upload_date'], reverse=True)
+        
+        return jsonify({
+            'success': True,
+            'data': receipts
+        })
+    except Exception as e:
+        logger.error(f"Error getting receipts: {e}")
+        return jsonify({'error': 'Failed to get receipts'}), 500
+
+@app.route('/api/receipt_image/<filename>')
+def get_receipt_image(filename):
+    """Serve receipt images"""
+    try:
+        upload_dir = app.config["UPLOAD_DIR"]
+        
+        # Find the file in the upload directory
+        for root, dirs, files in os.walk(upload_dir):
+            if filename in files:
+                return send_from_directory(root, filename)
+        
+        return jsonify({'error': 'Receipt image not found'}), 404
+    except Exception as e:
+        logger.error(f"Error serving receipt image: {e}")
+        return jsonify({'error': 'Failed to serve receipt image'}), 500
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""

@@ -279,13 +279,34 @@
                     <strong>GET</strong> <code>/api/transactions?limit=100</code> - Get latest transactions
                 </div>
                 <div class="api-endpoint">
-                    <strong>GET</strong> <code>/api/weekly_summary?start=2024-01-01&end=2024-01-07</code> - Get weekly summary
+                    <strong>GET</strong> <code>/api/category_totals</code> - Get food vs non-food totals
+                </div>
+                <div class="api-endpoint">
+                    <strong>GET</strong> <code>/api/download_excel</code> - Download Excel file
+                </div>
+                <div class="api-endpoint">
+                    <strong>GET</strong> <code>/api/receipts</code> - View all uploaded receipts
                 </div>
                 <div class="api-endpoint">
                     <strong>POST</strong> <code>/api/corrections</code> - Update transaction data
                 </div>
                 <div class="api-endpoint">
                     <strong>GET</strong> <code>/api/health</code> - Health check
+                </div>
+            </div>
+            
+            <div class="api-section">
+                <h3>📊 Quick Actions</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                    <button class="upload-btn" onclick="loadCategoryTotals()" style="margin: 0;">
+                        View Category Totals
+                    </button>
+                    <button class="upload-btn" onclick="downloadExcel()" style="margin: 0;">
+                        Download Excel
+                    </button>
+                    <button class="upload-btn" onclick="viewReceipts()" style="margin: 0;">
+                        View Receipts
+                    </button>
                 </div>
             </div>
         </div>
@@ -448,6 +469,74 @@
             })
             .catch(error => {
                 console.error('Failed to load stats:', error);
+            });
+        }
+
+        function loadCategoryTotals() {
+            fetch('/api/category_totals')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const totals = data.data;
+                    results.style.display = 'block';
+                    resultsContent.innerHTML = `
+                        <h3>📊 Category Totals</h3>
+                        <div class="result-item">
+                            <strong>Food Total:</strong> $${totals.food.total} (${totals.food.count} items)
+                        </div>
+                        <div class="result-item">
+                            <strong>Non-Food Total:</strong> $${totals.non_food.total} (${totals.non_food.count} items)
+                        </div>
+                        <div class="result-item">
+                            <strong>Grand Total:</strong> $${totals.grand_total}
+                        </div>
+                    `;
+                } else {
+                    showFileInfo(`Error loading category totals: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                showFileInfo(`Failed to load category totals: ${error.message}`, 'error');
+            });
+        }
+
+        function downloadExcel() {
+            window.open('/api/download_excel', '_blank');
+        }
+
+        function viewReceipts() {
+            fetch('/api/receipts')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const receipts = data.data;
+                    let html = '<h3>📁 Uploaded Receipts</h3>';
+                    
+                    if (receipts.length === 0) {
+                        html += '<div class="result-item">No receipts found</div>';
+                    } else {
+                        receipts.forEach(receipt => {
+                            const uploadDate = new Date(receipt.upload_date).toLocaleDateString();
+                            const fileSize = (receipt.size / 1024).toFixed(1);
+                            html += `
+                                <div class="result-item">
+                                    <strong>${receipt.filename}</strong><br>
+                                    Uploaded: ${uploadDate}<br>
+                                    Size: ${fileSize} KB<br>
+                                    <a href="${receipt.url}" target="_blank" style="color: #4facfe;">View Image</a>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    results.style.display = 'block';
+                    resultsContent.innerHTML = html;
+                } else {
+                    showFileInfo(`Error loading receipts: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                showFileInfo(`Failed to load receipts: ${error.message}`, 'error');
             });
         }
     </script>

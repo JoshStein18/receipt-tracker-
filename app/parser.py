@@ -25,14 +25,22 @@ class ReceiptParser:
     
     def parse_receipt(self, text: str, filename: str) -> ReceiptData:
         """Parse OCR text into structured receipt data"""
+        logger.info(f"Parsing receipt: {filename}")
+        logger.info(f"Raw OCR text: {text[:200]}...")
+        
         if not text:
+            logger.warning("No OCR text provided")
             return self._create_empty_receipt(filename)
         
         # Clean the text
         clean_text_data = clean_text(text)
         lines = [line.strip() for line in clean_text_data.split('\n') if line.strip()]
         
+        logger.info(f"Cleaned text lines: {len(lines)}")
+        logger.info(f"First few lines: {lines[:5]}")
+        
         if not lines:
+            logger.warning("No lines after cleaning")
             return self._create_empty_receipt(filename)
         
         # Extract basic information
@@ -41,9 +49,11 @@ class ReceiptParser:
         
         # Extract financial data
         subtotal, tax_amount, total_amount = self._extract_totals(lines)
+        logger.info(f"Extracted totals - Subtotal: {subtotal}, Tax: {tax_amount}, Total: {total_amount}")
         
         # Extract line items
         items = self._extract_items(lines)
+        logger.info(f"Extracted {len(items)} items")
         
         # Calculate confidence based on extracted data
         confidence = self._calculate_confidence(lines, subtotal, tax_amount, total_amount, items)
@@ -110,75 +120,104 @@ class ReceiptParser:
         tax_amount = 0.0
         total_amount = 0.0
         
+        logger.info("Extracting totals from lines...")
+        
         # Look for total amounts (usually at the end)
         for line in reversed(lines[-10:]):  # Check last 10 lines
             line_lower = line.lower()
+            logger.info(f"Checking line: {line}")
             
             # Extract amount from line
             amount = extract_currency(line)
             if amount is None:
                 continue
             
+            logger.info(f"Found amount {amount} in line: {line}")
+            
             # Determine what type of total this is
             if any(keyword in line_lower for keyword in self.total_keywords):
                 total_amount = amount
+                logger.info(f"Set total_amount to {amount}")
             elif any(keyword in line_lower for keyword in self.subtotal_keywords):
                 subtotal = amount
+                logger.info(f"Set subtotal to {amount}")
             elif any(keyword in line_lower for keyword in self.tax_keywords):
                 tax_amount = amount
+                logger.info(f"Set tax_amount to {amount}")
         
         # If we found a total but no subtotal, try to calculate it
         if total_amount > 0 and subtotal == 0 and tax_amount > 0:
             subtotal = total_amount - tax_amount
+            logger.info(f"Calculated subtotal: {subtotal}")
         elif total_amount > 0 and subtotal == 0 and tax_amount == 0:
             # If we only have total, assume it's the subtotal
             subtotal = total_amount
+            logger.info(f"Set subtotal to total_amount: {subtotal}")
         
         # If we still don't have totals, try to find any currency amounts
         if total_amount == 0 and subtotal == 0:
+            logger.info("No totals found, looking for any currency amounts...")
             amounts = []
             for line in lines:
                 amount = extract_currency(line)
                 if amount and amount > 0:
                     amounts.append(amount)
+                    logger.info(f"Found amount {amount} in line: {line}")
             
             if amounts:
                 # Sort amounts and use the largest as total
                 amounts.sort(reverse=True)
                 total_amount = amounts[0]
+                logger.info(f"Set total_amount to largest amount: {total_amount}")
                 if len(amounts) > 1:
                     subtotal = amounts[1]
+                    logger.info(f"Set subtotal to second largest: {subtotal}")
         
         # If still no totals, try to extract from the full text
         if total_amount == 0 and subtotal == 0:
+            logger.info("Still no totals, trying full text extraction...")
             full_text = ' '.join(lines)
             amounts = self._extract_amounts_from_text(full_text)
             if amounts:
                 amounts.sort(reverse=True)
                 total_amount = amounts[0]
+                logger.info(f"Set total_amount from full text: {total_amount}")
                 if len(amounts) > 1:
                     subtotal = amounts[1]
+                    logger.info(f"Set subtotal from full text: {subtotal}")
         
+        # If we have a total but no tax, try to estimate tax (common rates: 8-10%)
+        if total_amount > 0 and subtotal > 0 and tax_amount == 0:
+            estimated_tax = total_amount - subtotal
+            if 0 < estimated_tax < total_amount * 0.15:  # Reasonable tax range
+                tax_amount = estimated_tax
+                logger.info(f"Estimated tax_amount: {tax_amount}")
+        
+        logger.info(f"Final totals - Subtotal: {subtotal}, Tax: {tax_amount}, Total: {total_amount}")
         return subtotal, tax_amount, total_amount
     
     def _extract_items(self, lines: List[str]) -> List[ReceiptItem]:
         """Extract line items from receipt"""
         items = []
+        logger.info("Extracting items from lines...")
         
         # Look for lines that match item patterns
         for line in lines:
             # Skip lines that are clearly not items
             if any(keyword in line.lower() for keyword in 
                    self.total_keywords + self.subtotal_keywords + self.tax_keywords + self.store_keywords):
+                logger.info(f"Skipping line (contains keywords): {line}")
                 continue
             
             # Try different item patterns
             item = self._parse_item_line(line)
             if item:
                 items.append(item)
+                logger.info(f"Added item: {item.description} - ${item.total_price}")
         
         # If no items found, try to extract from any line with currency
         if not items:
+            logger.info("No items found with standard patterns, trying currency lines...")
             for line in lines:
                 # Look for lines with currency amounts that might be items
                 if '$' in line or re.search(r'\d+\.\d{2}', line):
@@ -188,13 +227,34 @@ class ReceiptParser:
                         item = self._parse_item_line(line)
                         if item:
                             items.append(item)
+                            logger.info(f"Added item from currency line: {item.description} - ${item.total_price}")
         
         # If still no items, try to parse the entire text as one line
         if not items:
+            logger.info("Still no items, trying full text extraction...")
             # Join all lines and try to extract items from the combined text
             full_text = ' '.join(lines)
             items = self._extract_items_from_text(full_text)
+            logger.info(f"Extracted {len(items)} items from full text")
         
+        # If still no items, create a generic item from the total
+        if not items:
+            logger.info("No items found, creating generic item from total...")
+            # Try to find any amount and create a generic item
+            for line in lines:
+                amount = extract_currency(line)
+                if amount and amount > 0:
+                    items.append(ReceiptItem(
+                        description="Receipt Item",
+                        quantity=1.0,
+                        unit_price=amount,
+                        total_price=amount,
+                        confidence=0.3
+                    ))
+                    logger.info(f"Created generic item with amount: ${amount}")
+                    break
+        
+        logger.info(f"Final item count: {len(items)}")
         return items
     
     def _extract_items_from_text(self, text: str) -> List[ReceiptItem]:

@@ -1,79 +1,5 @@
 {
   "categories": {
-    "groceries": {
-      "keywords": [
-        "grocery", "food", "supermarket", "market", "fresh", "produce",
-        "meat", "dairy", "bread", "milk", "eggs", "cheese", "fruit",
-        "vegetable", "organic", "whole foods", "safeway", "kroger",
-        "walmart", "target", "costco", "sam's club"
-      ],
-      "description": "Grocery and food items"
-    },
-    "restaurants": {
-      "keywords": [
-        "restaurant", "cafe", "coffee", "pizza", "burger", "sandwich",
-        "dining", "food", "eat", "lunch", "dinner", "breakfast",
-        "mcdonald's", "burger king", "subway", "starbucks", "dunkin",
-        "chipotle", "taco bell", "kfc", "pizza hut", "domino's"
-      ],
-      "description": "Restaurant and dining expenses"
-    },
-    "gas": {
-      "keywords": [
-        "gas", "fuel", "gasoline", "petrol", "station", "shell",
-        "exxon", "chevron", "bp", "mobil", "speedway", "7-eleven"
-      ],
-      "description": "Gas and fuel expenses"
-    },
-    "utilities": {
-      "keywords": [
-        "electric", "water", "gas", "utility", "power", "energy",
-        "internet", "phone", "cable", "internet", "telecom"
-      ],
-      "description": "Utility bills and services"
-    },
-    "transportation": {
-      "keywords": [
-        "uber", "lyft", "taxi", "bus", "train", "metro", "transit",
-        "parking", "toll", "highway", "airport", "flight", "rental"
-      ],
-      "description": "Transportation and travel"
-    },
-    "healthcare": {
-      "keywords": [
-        "pharmacy", "drug", "medicine", "medical", "doctor", "hospital",
-        "clinic", "cvs", "walgreens", "rite aid", "health", "prescription"
-      ],
-      "description": "Healthcare and medical expenses"
-    },
-    "entertainment": {
-      "keywords": [
-        "movie", "cinema", "theater", "netflix", "spotify", "amazon prime",
-        "game", "entertainment", "sports", "gym", "fitness", "club"
-      ],
-      "description": "Entertainment and recreation"
-    },
-    "shopping": {
-      "keywords": [
-        "clothing", "apparel", "shoes", "accessories", "electronics",
-        "amazon", "ebay", "online", "store", "retail", "fashion"
-      ],
-      "description": "General shopping and retail"
-    },
-    "office": {
-      "keywords": [
-        "office", "supplies", "stationery", "paper", "pen", "pencil",
-        "staples", "office depot", "business", "work", "professional"
-      ],
-      "description": "Office supplies and business expenses"
-    },
-    "home": {
-      "keywords": [
-        "home", "depot", "lowes", "hardware", "furniture", "appliance",
-        "garden", "lawn", "maintenance", "repair", "improvement"
-      ],
-      "description": "Home improvement and maintenance"
-    },
     "food": {
       "keywords": [
         "food", "eat", "meal", "snack", "drink", "beverage", "coffee", "tea",
@@ -83,36 +9,45 @@
         "apples", "bananas", "oranges", "grapes", "strawberries", "milk",
         "cheese", "yogurt", "butter", "eggs", "bread", "cereal", "rice",
         "pasta", "noodles", "meat", "chicken", "beef", "pork", "fish",
-        "vegetables", "fruits", "snacks", "candy", "chocolate", "cookies"
+        "vegetables", "fruits", "snacks", "candy", "chocolate", "cookies",
+        "grocery", "supermarket", "market", "dairy", "fruit", "vegetable",
+        "whole foods", "safeway", "kroger", "walmart", "target", "costco",
+        "mcdonald's", "burger king", "subway", "starbucks", "dunkin",
+        "chipotle", "taco bell", "kfc", "pizza hut", "domino's"
       ],
       "description": "All food and dining expenses"
     },
-    "technology": {
+    "non-food": {
       "keywords": [
-        "computer", "laptop", "desktop", "tablet", "phone", "smartphone",
-        "electronics", "tech", "software", "hardware", "accessories",
-        "cable", "charger", "battery", "headphones", "speaker", "monitor",
-        "keyboard", "mouse", "webcam", "microphone", "camera", "gaming",
-        "console", "controller", "apple", "samsung", "microsoft", "google",
-        "amazon", "best buy", "microcenter", "newegg", "dell", "hp", "lenovo"
+        "gas", "fuel", "gasoline", "petrol", "station", "shell", "exxon", "chevron",
+        "electric", "water", "utility", "power", "energy", "internet", "phone", "cable",
+        "uber", "lyft", "taxi", "bus", "train", "metro", "transit", "parking", "toll",
+        "pharmacy", "drug", "medicine", "medical", "doctor", "hospital", "clinic",
+        "cvs", "walgreens", "rite aid", "health", "prescription",
+        "movie", "cinema", "theater", "netflix", "spotify", "amazon prime", "game",
+        "entertainment", "sports", "gym", "fitness", "club",
+        "clothing", "apparel", "shoes", "accessories", "electronics", "amazon", "ebay",
+        "online", "store", "retail", "fashion",
+        "office", "supplies", "stationery", "paper", "pen", "pencil", "staples",
+        "office depot", "business", "work", "professional",
+        "home", "depot", "lowes", "hardware", "furniture", "appliance", "garden",
+        "lawn", "maintenance", "repair", "improvement",
+        "computer", "laptop", "desktop", "tablet", "phone", "smartphone", "tech",
+        "software", "hardware", "cable", "charger", "battery", "headphones", "speaker",
+        "monitor", "keyboard", "mouse", "webcam", "microphone", "camera", "gaming",
+        "console", "controller", "apple", "samsung", "microsoft", "google", "best buy",
+        "microcenter", "newegg", "dell", "hp", "lenovo"
       ],
-      "description": "Technology and electronics"
-    },
-    "misc": {
-      "keywords": [
-        "misc", "miscellaneous", "other", "various", "general", "unknown",
-        "unclassified", "uncategorized", "random", "stuff", "items"
-      ],
-      "description": "Miscellaneous and uncategorized items"
+      "description": "All non-food expenses"
     }
   },
   "store_mappings": {
-    "walmart": "groceries",
-    "target": "shopping",
-    "costco": "groceries",
-    "safeway": "groceries",
-    "kroger": "groceries",
-    "whole foods": "groceries",
+    "walmart": "food",
+    "target": "non-food",
+    "costco": "food",
+    "safeway": "food",
+    "kroger": "food",
+    "whole foods": "food",
     "starbucks": "food",
     "mcdonald's": "food",
     "subway": "food",
@@ -121,19 +56,19 @@
     "kfc": "food",
     "taco bell": "food",
     "chipotle": "food",
-    "shell": "gas",
-    "exxon": "gas",
-    "chevron": "gas",
-    "cvs": "healthcare",
-    "walgreens": "healthcare",
-    "amazon": "shopping",
-    "best buy": "technology",
-    "apple": "technology",
-    "microsoft": "technology",
-    "dell": "technology",
-    "hp": "technology",
-    "lenovo": "technology",
-    "home depot": "home",
-    "lowes": "home"
+    "shell": "non-food",
+    "exxon": "non-food",
+    "chevron": "non-food",
+    "cvs": "non-food",
+    "walgreens": "non-food",
+    "amazon": "non-food",
+    "best buy": "non-food",
+    "apple": "non-food",
+    "microsoft": "non-food",
+    "dell": "non-food",
+    "hp": "non-food",
+    "lenovo": "non-food",
+    "home depot": "non-food",
+    "lowes": "non-food"
   }
 }
