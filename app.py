@@ -7,7 +7,7 @@ import uuid
 import json
 import logging
 
-from trained_ml_processor import TrainedMLProcessor
+from smart_ml_processor import SmartMLProcessor
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -23,8 +23,8 @@ app.config['EXCEL_FILE'] = 'receipts.xlsx'
 # Create directories
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Initialize trained ML processor with real data
-receipt_processor = TrainedMLProcessor()
+# Initialize smart ML processor for any receipt format
+receipt_processor = SmartMLProcessor()
 
 def save_to_excel(data):
     """Save receipt data to Excel file"""
@@ -112,10 +112,10 @@ def upload_receipt():
         
         logger.info(f"File saved: {file_path}")
         
-        # Process with trained ML model
+        # Process with smart ML model (handles any receipt format)
         try:
             parsed_data = receipt_processor.process_receipt(file_path, filename)
-            logger.info(f"Trained ML processing complete: {len(parsed_data['items'])} items extracted")
+            logger.info(f"Smart ML processing complete: {len(parsed_data['items'])} items extracted")
             
             # Save to Excel
             save_success = save_to_excel(parsed_data)
@@ -124,7 +124,7 @@ def upload_receipt():
             
             return jsonify({
                 'success': True,
-                'message': 'Receipt processed successfully with trained ML model',
+                'message': 'Receipt processed successfully with smart ML model',
                 'data': parsed_data
             })
             
@@ -205,7 +205,7 @@ def health():
         'status': 'healthy',
         'timestamp': datetime.now().isoformat(),
         'excel_file': app.config['EXCEL_FILE'],
-        'features': 'Trained ML Model + Google Vision + Excel Export'
+        'features': 'Smart ML (Any Receipt) + Google Vision + Excel Export'
     })
 
 if __name__ == '__main__':
