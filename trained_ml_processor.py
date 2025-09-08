@@ -552,6 +552,7 @@ Please take this survey within 7 days
         """Extract items from receipt text using trained ML model"""
         lines = text.strip().split('\n')
         items = []
+        processed_lines = set()  # Track processed lines to avoid duplicates
         
         # Keywords to skip
         skip_keywords = ['total', 'subtotal', 'tax', 'discount', 'tip', 'change', 'cash', 'card', 'date', 'time', 'payment', 'visa', 'auth', 'return', 'survey', 'help', 'password', 'user id']
@@ -559,6 +560,10 @@ Please take this survey within 7 days
         for i, line in enumerate(lines):
             line = line.strip()
             if not line or any(keyword in line.lower() for keyword in skip_keywords):
+                continue
+            
+            # Skip if we've already processed this line
+            if i in processed_lines:
                 continue
             
             # Look for Target-style item patterns: "GROCERY 268020018 GG GRND BEEF"
@@ -580,14 +585,16 @@ Please take this survey within 7 days
                             'total_price': total_price,
                             'category': category
                         })
-                        # Skip the next line since we processed it
+                        # Mark both lines as processed
+                        processed_lines.add(i)
+                        processed_lines.add(i + 1)
                         continue
             
             # Look for item patterns with @ symbol: "2 @ $7.99 ea"
             qty_price_match = re.search(r'(\d+)\s*@\s*\$?(\d+\.?\d*)\s*ea', line)
             if qty_price_match:
                 # Look for description in previous line
-                if i > 0:
+                if i > 0 and i - 1 not in processed_lines:
                     prev_line = lines[i - 1].strip()
                     if not any(keyword in prev_line.lower() for keyword in skip_keywords):
                         quantity, unit_price = qty_price_match.groups()
@@ -601,6 +608,9 @@ Please take this survey within 7 days
                             'total_price': total_price,
                             'category': category
                         })
+                        # Mark both lines as processed
+                        processed_lines.add(i - 1)
+                        processed_lines.add(i)
                         continue
             
             # Look for simple qty x price pattern: "2 x 7.99"
@@ -617,6 +627,7 @@ Please take this survey within 7 days
                     'total_price': total_price,
                     'category': category
                 })
+                processed_lines.add(i)
                 continue
             
             # Look for simple price pattern: "description 12.99"
@@ -635,6 +646,7 @@ Please take this survey within 7 days
                             'total_price': price_val,
                             'category': category
                         })
+                        processed_lines.add(i)
                 except ValueError:
                     continue
         
