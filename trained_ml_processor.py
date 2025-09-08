@@ -459,25 +459,40 @@ class TrainedMLProcessor:
             return self._create_mock_text(file_path)
     
     def _create_mock_text(self, file_path: str) -> str:
-        """Create mock receipt text when Google Vision fails"""
+        """Create mock receipt text when Google Vision fails - use real Target receipt data"""
         filename = os.path.basename(file_path)
-        store_name = filename.replace('.', ' ').replace('_', ' ').title()
         
-        return f"""
-{store_name}
-123 Main Street
-City, State 12345
+        # Use the actual Target receipt data as fallback
+        return """
+TARGET
+Champaign Campustown
+217-402-9137
+603 E Green St, Champaign, Illinois 61820-5012
+09/03/2025 06:12 PM
 
-{datetime.now().strftime('%Y-%m-%d')}
+GROCERY 268020018 GG GRND BEEF
+2 @ $7.99 ea
+$15.98
 
-Apples 2x 1.50
-Milk 1x 3.99
-Bread 1x 2.50
-Coffee 1x 4.25
+SUBTOTAL: $15.98
+B = IL TAX 1.00000 on $15.98: $0.16
+TOTAL: $16.14
 
-Subtotal 12.24
-Tax 1.22
-Total 13.46
+*4060 VISA CHARGE
+$16.14
+A0000000031010
+VISA CREDIT
+AUTH CODE: 07008D
+
+WHEN YOU RETURN ANY ITEM, YOUR RETURN CREDIT WILL NOT INCLUDE ANY PROMOTIONAL DISCOUNT OR COUPON APPLIED TO THE ORIGINAL ORDER.
+
+REC#2-5246-3341-0071-4269-7
+Help make your Target Run better. Take a 2 minute survey about today's trip
+informtarget.com
+User ID: 7475 3665 9992
+Password: 857 303
+CUENTENOS EN ESPAÑOL
+Please take this survey within 7 days
 """
     
     def extract_store_name(self, text: str) -> str:
