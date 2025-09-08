@@ -19,9 +19,23 @@ class ReceiptProcessor:
             'apples', 'bananas', 'oranges', 'grapes', 'strawberries', 'milk',
             'cheese', 'yogurt', 'butter', 'eggs', 'bread', 'cereal', 'rice',
             'grocery', 'supermarket', 'market', 'dairy', 'fruit', 'vegetable',
-            'walmart', 'safeway', 'kroger', 'whole foods', 'costco',
+            'walmart', 'safeway', 'kroger', 'whole foods', 'costco', 'target',
             'mcdonald', 'burger king', 'subway', 'starbucks', 'dunkin',
-            'chipotle', 'taco bell', 'kfc', 'pizza hut', 'domino'
+            'chipotle', 'taco bell', 'kfc', 'pizza hut', 'domino',
+            # Enhanced from real Target receipt
+            'ground beef', 'grnd beef', 'meat', 'pork', 'turkey', 'lamb',
+            'deli', 'deli meat', 'sausage', 'bacon', 'ham', 'steak',
+            'seafood', 'salmon', 'tuna', 'shrimp', 'crab', 'lobster',
+            'dairy', 'cream', 'sour cream', 'kefir', 'buttermilk',
+            'frozen', 'frozen food', 'ice cream', 'frozen vegetables',
+            'bakery', 'rolls', 'bagels', 'muffins', 'cakes', 'pastries',
+            'snacks', 'chips', 'crackers', 'nuts', 'seeds', 'trail mix',
+            'beverages', 'soda', 'juice', 'water', 'sports drink',
+            'condiments', 'sauce', 'ketchup', 'mustard', 'mayo', 'dressing',
+            'spices', 'herbs', 'seasoning', 'salt', 'pepper', 'garlic',
+            'canned', 'canned goods', 'beans', 'tomatoes',
+            'pasta', 'noodles', 'grains', 'oats', 'quinoa',
+            'baby food', 'formula', 'infant'
         ]
         
         self.non_food_keywords = [
@@ -226,15 +240,57 @@ Total 13.46
         items = []
         
         # Keywords to skip
-        skip_keywords = ['total', 'subtotal', 'tax', 'discount', 'tip', 'change', 'cash', 'card', 'date', 'time']
+        skip_keywords = ['total', 'subtotal', 'tax', 'discount', 'tip', 'change', 'cash', 'card', 'date', 'time', 'payment', 'visa', 'auth', 'return', 'survey', 'help', 'password', 'user id']
         
-        for line in lines:
+        for i, line in enumerate(lines):
             line = line.strip()
             if not line or any(keyword in line.lower() for keyword in skip_keywords):
                 continue
             
-            # Look for item patterns
-            item_match = re.search(r'^(.+?)\s+(\d+)\s*x\s*(\d+\.?\d*)\s*$', line)  # qty x price
+            # Look for Target-style item patterns: "GROCERY 268020018 GG GRND BEEF"
+            if re.search(r'^[A-Z\s]+\d+', line) and not re.search(r'[@$]', line):
+                # This looks like an item description line
+                # Check if next line has quantity and price
+                if i + 1 < len(lines):
+                    next_line = lines[i + 1].strip()
+                    qty_price_match = re.search(r'(\d+)\s*@\s*\$?(\d+\.?\d*)\s*ea', next_line)
+                    if qty_price_match:
+                        quantity, unit_price = qty_price_match.groups()
+                        total_price = float(quantity) * float(unit_price)
+                        category = self.categorize_item(line, store_name)
+                        
+                        items.append({
+                            'description': line.strip(),
+                            'quantity': float(quantity),
+                            'unit_price': float(unit_price),
+                            'total_price': total_price,
+                            'category': category
+                        })
+                        # Skip the next line since we processed it
+                        continue
+            
+            # Look for item patterns with @ symbol: "2 @ $7.99 ea"
+            qty_price_match = re.search(r'(\d+)\s*@\s*\$?(\d+\.?\d*)\s*ea', line)
+            if qty_price_match:
+                # Look for description in previous line
+                if i > 0:
+                    prev_line = lines[i - 1].strip()
+                    if not any(keyword in prev_line.lower() for keyword in skip_keywords):
+                        quantity, unit_price = qty_price_match.groups()
+                        total_price = float(quantity) * float(unit_price)
+                        category = self.categorize_item(prev_line, store_name)
+                        
+                        items.append({
+                            'description': prev_line.strip(),
+                            'quantity': float(quantity),
+                            'unit_price': float(unit_price),
+                            'total_price': total_price,
+                            'category': category
+                        })
+                        continue
+            
+            # Look for simple qty x price pattern: "2 x 7.99"
+            item_match = re.search(r'^(.+?)\s+(\d+)\s*x\s*(\d+\.?\d*)\s*$', line)
             if item_match:
                 description, quantity, unit_price = item_match.groups()
                 total_price = float(quantity) * float(unit_price)
@@ -249,7 +305,7 @@ Total 13.46
                 })
                 continue
             
-            # Look for simple price pattern
+            # Look for simple price pattern: "description 12.99"
             price_match = re.search(r'^(.+?)\s+(\d+\.?\d*)\s*$', line)
             if price_match:
                 description, price = price_match.groups()
