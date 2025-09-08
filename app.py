@@ -7,7 +7,7 @@ import uuid
 import json
 import logging
 
-from real_ml_processor import RealMLProcessor
+from trained_ml_processor import TrainedMLProcessor
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -23,8 +23,8 @@ app.config['EXCEL_FILE'] = 'receipts.xlsx'
 # Create directories
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Initialize real ML processor with Google Vision API
-receipt_processor = RealMLProcessor()
+# Initialize trained ML processor with real data
+receipt_processor = TrainedMLProcessor()
 
 def save_to_excel(data):
     """Save receipt data to Excel file"""
@@ -112,10 +112,10 @@ def upload_receipt():
         
         logger.info(f"File saved: {file_path}")
         
-        # Process with real Google Vision API
+        # Process with trained ML model
         try:
             parsed_data = receipt_processor.process_receipt(file_path, filename)
-            logger.info(f"Google Vision processing complete: {len(parsed_data['items'])} items extracted")
+            logger.info(f"Trained ML processing complete: {len(parsed_data['items'])} items extracted")
             
             # Save to Excel
             save_success = save_to_excel(parsed_data)
@@ -124,7 +124,7 @@ def upload_receipt():
             
             return jsonify({
                 'success': True,
-                'message': 'Receipt processed successfully with Google Vision API',
+                'message': 'Receipt processed successfully with trained ML model',
                 'data': parsed_data
             })
             
@@ -205,7 +205,7 @@ def health():
         'status': 'healthy',
         'timestamp': datetime.now().isoformat(),
         'excel_file': app.config['EXCEL_FILE'],
-        'features': 'Google Vision API + Real ML + Excel Export'
+        'features': 'Trained ML Model + Google Vision + Excel Export'
     })
 
 if __name__ == '__main__':
